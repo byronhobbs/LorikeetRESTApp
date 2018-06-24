@@ -13,6 +13,8 @@ namespace LorikeetRESTApp.Controllers
     {
         private readonly IFileProvider fileProvider;
 
+        private const string memberPicDirectory = "memberpics";
+
         public HomeController(IFileProvider fileProvider)
         {
             this.fileProvider = fileProvider;
@@ -31,7 +33,7 @@ namespace LorikeetRESTApp.Controllers
             if (file == null || file.Length == 0)
                 return Content("file not selected");
 
-            var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload", file.FileName);
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), memberPicDirectory, file.FileName);
 
             if (!Directory.Exists(Path.GetDirectoryName(directory)))
             {
@@ -43,7 +45,7 @@ namespace LorikeetRESTApp.Controllers
                 await file.CopyToAsync(stream);
             }
 
-            return Ok();
+            return Ok(file.FileName + " uploaded successfully");
         }
 
         [HttpPost]
@@ -54,15 +56,16 @@ namespace LorikeetRESTApp.Controllers
             if (files == null || files.Count == 0)
                 return Content("files not selected");
 
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), memberPicDirectory);
+
+            if (!Directory.Exists(Path.GetDirectoryName(directory)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(directory));
+            }
+
             foreach (var file in files)
             {
-                var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload");
-                var filePath = Path.Combine(directory, file.FileName);
-
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), memberPicDirectory, file.FileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
@@ -70,7 +73,7 @@ namespace LorikeetRESTApp.Controllers
                 }
             }
 
-            return RedirectToAction("Files");
+            return Ok(files.Count + " files uploaded Successfully");
         }
 
         public async Task<IActionResult> Download(string filename)
@@ -78,8 +81,7 @@ namespace LorikeetRESTApp.Controllers
             if (filename == null)
                 return Content("filename not present");
 
-            var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload");
-            var filePath = Path.Combine(directory, filename);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), memberPicDirectory, filename);
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(filePath, FileMode.Open))
