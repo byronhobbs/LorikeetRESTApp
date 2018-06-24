@@ -5,44 +5,31 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
 using LorikeetRESTApp.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LorikeetRESTApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IFileProvider fileProvider;
-
-        public HomeController(IFileProvider fileProvider)
-        {
-            this.fileProvider = fileProvider;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        [Route("api/files/upload")]
         [HttpPost]
-        [Route("api/files/uploadfile/")]
+        [AllowAnonymous]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return Content("file not selected");
 
-            var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "Upload",
-                        file.GetFilename());
+            var path = "~\\Upload";
 
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return RedirectToAction("Files");
+            return Ok(new { path });
         }
 
         [HttpPost]
-        [Route("api/files/uploadfiles/")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
             if (files == null || files.Count == 0)
@@ -50,9 +37,7 @@ namespace LorikeetRESTApp.Controllers
 
             foreach (var file in files)
             {
-                var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "Upload",
-                        file.GetFilename());
+                var path = "~\\Upload";
 
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -63,46 +48,12 @@ namespace LorikeetRESTApp.Controllers
             return RedirectToAction("Files");
         }
 
-        [HttpPost]
-        [Route("api/files/uploadfileviamodel")]
-        public async Task<IActionResult> UploadFileViaModel(FileInputModel model)
-        {
-            if (model == null ||
-                model.FileToUpload == null || model.FileToUpload.Length == 0)
-                return Content("file not selected");
-
-            var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "Upload",
-                        model.FileToUpload.GetFilename());
-
-            using (var stream = new FileStream(path, FileMode.Create))
-            {
-                await model.FileToUpload.CopyToAsync(stream);
-            }
-
-            return RedirectToAction("Files");
-        }
-
-        public IActionResult Files()
-        {
-            var model = new FilesViewModel();
-            foreach (var item in this.fileProvider.GetDirectoryContents(""))
-            {
-                model.Files.Add(
-                    new FileDetails { Name = item.Name, Path = item.PhysicalPath });
-            }
-            return View(model);
-        }
-
-        [Route("api/files/download/{1}")]
         public async Task<IActionResult> Download(string filename)
         {
             if (filename == null)
                 return Content("filename not present");
 
-            var path = Path.Combine(
-                           Directory.GetCurrentDirectory(),
-                           "Upload", filename);
+            var path = "~\\Upload";
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
