@@ -31,21 +31,19 @@ namespace LorikeetRESTApp.Controllers
             if (file == null || file.Length == 0)
                 return Content("file not selected");
 
-            var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "Upload",
-                        file.FileName);
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload", file.FileName);
 
-            if (!Directory.Exists(path))
+            if (!Directory.Exists(Path.GetDirectoryName(directory)))
             {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(Path.GetDirectoryName(directory));
             }
 
-            using (var stream = new FileStream(path, FileMode.Create))
+            using (var stream = new FileStream(directory, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return RedirectToAction("Files");
+            return Ok();
         }
 
         [HttpPost]
@@ -58,16 +56,15 @@ namespace LorikeetRESTApp.Controllers
 
             foreach (var file in files)
             {
-                var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "Upload",
-                        file.FileName);
+                var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload");
+                var filePath = Path.Combine(directory, file.FileName);
 
-                if (!Directory.Exists(path))
+                if (!Directory.Exists(directory))
                 {
-                    Directory.CreateDirectory(path);
+                    Directory.CreateDirectory(directory);
                 }
 
-                using (var stream = new FileStream(path, FileMode.Create))
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
@@ -81,17 +78,16 @@ namespace LorikeetRESTApp.Controllers
             if (filename == null)
                 return Content("filename not present");
 
-            var path = Path.Combine(
-                           Directory.GetCurrentDirectory(),
-                           "Upload", filename);
+            var directory = Path.Combine(Directory.GetCurrentDirectory(), "Upload");
+            var filePath = Path.Combine(directory, filename);
 
             var memory = new MemoryStream();
-            using (var stream = new FileStream(path, FileMode.Open))
+            using (var stream = new FileStream(filePath, FileMode.Open))
             {
                 await stream.CopyToAsync(memory);
             }
             memory.Position = 0;
-            return File(memory, GetContentType(path), Path.GetFileName(path));
+            return File(memory, GetContentType(filePath), Path.GetFileName(filePath));
         }
 
         private string GetContentType(string path)
