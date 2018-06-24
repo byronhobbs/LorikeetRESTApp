@@ -11,25 +11,46 @@ namespace LorikeetRESTApp.Controllers
 {
     public class HomeController : Controller
     {
-        [Route("api/files/upload")]
+        private readonly IFileProvider fileProvider;
+
+        public HomeController(IFileProvider fileProvider)
+        {
+            this.fileProvider = fileProvider;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
         [HttpPost]
         [AllowAnonymous]
+        [Route("api/files/upload")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return Content("file not selected");
 
-            var path = "~\\Upload";
+            var path = Path.Combine(
+                        Directory.GetCurrentDirectory(), "Upload",
+                        file.FileName);
+
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
 
             using (var stream = new FileStream(path, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            return Ok(new { path });
+            return RedirectToAction("Files");
         }
 
         [HttpPost]
+        [AllowAnonymous]
+        [Route("api/files/uploads")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
             if (files == null || files.Count == 0)
@@ -37,7 +58,14 @@ namespace LorikeetRESTApp.Controllers
 
             foreach (var file in files)
             {
-                var path = "~\\Upload";
+                var path = Path.Combine(
+                        Directory.GetCurrentDirectory(), "Upload",
+                        file.FileName);
+
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path);
+                }
 
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
@@ -53,7 +81,9 @@ namespace LorikeetRESTApp.Controllers
             if (filename == null)
                 return Content("filename not present");
 
-            var path = "~\\Upload";
+            var path = Path.Combine(
+                           Directory.GetCurrentDirectory(),
+                           "Upload", filename);
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))

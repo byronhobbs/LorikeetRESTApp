@@ -15,16 +15,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Reflection;
 
 namespace LorikeetRESTApp
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private IHostingEnvironment _hostingEnvironment;
+
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+
+            _hostingEnvironment = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -74,6 +85,12 @@ namespace LorikeetRESTApp
                 });
 
             services.AddAutoMapper();
+
+            var physicalProvider = _hostingEnvironment.ContentRootFileProvider;
+            var embeddedProvider = new EmbeddedFileProvider(Assembly.GetEntryAssembly());
+            var compositeProvider = new CompositeFileProvider(physicalProvider, embeddedProvider);
+
+            services.AddSingleton<IFileProvider>(compositeProvider);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
