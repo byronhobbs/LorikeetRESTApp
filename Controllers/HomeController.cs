@@ -23,14 +23,14 @@ namespace LorikeetRESTApp.Controllers
         }
 
         [HttpPost]
-        [Route("api/files/uploadfile")]
+        [Route("api/files/uploadfile/")]
         public async Task<IActionResult> UploadFile(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return Content("file not selected");
 
             var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "wwwroot",
+                        Directory.GetCurrentDirectory(), "Upload",
                         file.GetFilename());
 
             using (var stream = new FileStream(path, FileMode.Create))
@@ -42,7 +42,7 @@ namespace LorikeetRESTApp.Controllers
         }
 
         [HttpPost]
-        [Route("api/files/uploadfiles")]
+        [Route("api/files/uploadfiles/")]
         public async Task<IActionResult> UploadFiles(List<IFormFile> files)
         {
             if (files == null || files.Count == 0)
@@ -51,7 +51,7 @@ namespace LorikeetRESTApp.Controllers
             foreach (var file in files)
             {
                 var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "wwwroot",
+                        Directory.GetCurrentDirectory(), "Upload",
                         file.GetFilename());
 
                 using (var stream = new FileStream(path, FileMode.Create))
@@ -72,7 +72,7 @@ namespace LorikeetRESTApp.Controllers
                 return Content("file not selected");
 
             var path = Path.Combine(
-                        Directory.GetCurrentDirectory(), "wwwroot",
+                        Directory.GetCurrentDirectory(), "Upload",
                         model.FileToUpload.GetFilename());
 
             using (var stream = new FileStream(path, FileMode.Create))
@@ -102,7 +102,7 @@ namespace LorikeetRESTApp.Controllers
 
             var path = Path.Combine(
                            Directory.GetCurrentDirectory(),
-                           "wwwroot", filename);
+                           "Upload", filename);
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(path, FileMode.Open))
