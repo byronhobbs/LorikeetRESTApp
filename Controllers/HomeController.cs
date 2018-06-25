@@ -76,6 +76,9 @@ namespace LorikeetRESTApp.Controllers
             return Ok(files.Count + " files uploaded Successfully");
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("api/files/download/{filename}")]
         public async Task<IActionResult> Download(string filename)
         {
             if (filename == null)
