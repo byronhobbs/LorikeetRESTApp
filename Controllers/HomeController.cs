@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.IO;
 using Microsoft.Extensions.FileProviders;
-using LorikeetRESTApp.Models;
 using Microsoft.AspNetCore.Authorization;
 
 namespace LorikeetRESTApp.Controllers
@@ -85,6 +84,11 @@ namespace LorikeetRESTApp.Controllers
                 return Content("filename not present");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), memberPicDirectory, filename);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound("File Not Found");
+            }
 
             var memory = new MemoryStream();
             using (var stream = new FileStream(filePath, FileMode.Open))
