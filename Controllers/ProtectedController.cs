@@ -47,7 +47,7 @@ namespace LorikeetRESTApp.Controllers
 						Member.MobileNumber = item.MobileNumber;
 						Member.EmailAddress = item.EmailAddress;
 						Member.DateAltered = item.DateAltered;
-
+                        Member.PictureGUID = item.PictureGuid;
 						membersToREST.Add(Member);
 					}
 				}

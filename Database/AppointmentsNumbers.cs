@@ -7,7 +7,7 @@ namespace LorikeetRESTApp.Database
     {
         public int AppointmentsNumbers1 { get; set; }
         public DateTime? Date { get; set; }
-        public int? Number { get; set; }
         public int? LabelId { get; set; }
+        public int? Number { get; set; }
     }
 }
