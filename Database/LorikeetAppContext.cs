@@ -45,7 +45,7 @@ namespace LorikeetRESTApp.Database
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseMySql("server=192.168.1.231;port=3306;user=lorikeet;password=lorikeet;database=LorikeetApp;Tiny As Boolean=True;");
+                optionsBuilder.UseMySql("server=192.168.1.231;database=LorikeetApp;userid=lorikeet;pwd=lorikeet;port=3306;");
             }
         }
 
