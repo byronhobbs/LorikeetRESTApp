@@ -91,6 +91,10 @@ namespace LorikeetRESTApp
             var compositeProvider = new CompositeFileProvider(physicalProvider, embeddedProvider);
 
             services.AddSingleton<IFileProvider>(compositeProvider);
+            services.Configure<IISOptions>(options =>
+            {
+                options.ForwardClientCertificate = false;
+            });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

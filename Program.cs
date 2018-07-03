@@ -15,27 +15,7 @@ namespace LorikeetRESTApp
     {
         public static void Main(string[] args)
         {
-            var isService = true;
-
-            if (Debugger.IsAttached || args.Contains("--console"))
-            {
-                isService = false;
-            }
-
-            var pathToContentRoot = Directory.GetCurrentDirectory();
-
-            if (isService)
-            {
-                var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
-                pathToContentRoot = Path.GetDirectoryName(pathToExe);
-            }
-
-            var webHostArgs = args.Where(arg => arg != "--console").ToArray();
-
-            var host = WebHost.CreateDefaultBuilder(webHostArgs)
-                .UseContentRoot(pathToContentRoot)
-                .UseStartup<Startup>()
-                .Build();
+            var host = CreateWebHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope())
             {
@@ -45,14 +25,7 @@ namespace LorikeetRESTApp
                 DatabaseSeed.Seed(context, passwordHasher);
             }
 
-            if (isService)
-            {
-                host.RunAsCustomService();
-            }
-            else
-            {
-                host.Run();
-            }
+            host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
