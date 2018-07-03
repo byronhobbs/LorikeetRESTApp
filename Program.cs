@@ -1,8 +1,13 @@
-﻿using LorikeetRESTApp.Core.Security.Hashing;
+﻿using LorikeetRESTApp.Classes;
+using LorikeetRESTApp.Core.Security.Hashing;
 using LorikeetRESTApp.Persistence;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.WindowsServices;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace LorikeetRESTApp
 {
@@ -10,7 +15,27 @@ namespace LorikeetRESTApp
     {
         public static void Main(string[] args)
         {
-            var host = CreateWebHostBuilder(args).Build();
+            var isService = true;
+
+            if (Debugger.IsAttached || args.Contains("--console"))
+            {
+                isService = false;
+            }
+
+            var pathToContentRoot = Directory.GetCurrentDirectory();
+
+            if (isService)
+            {
+                var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
+                pathToContentRoot = Path.GetDirectoryName(pathToExe);
+            }
+
+            var webHostArgs = args.Where(arg => arg != "--console").ToArray();
+
+            var host = WebHost.CreateDefaultBuilder(webHostArgs)
+                .UseContentRoot(pathToContentRoot)
+                .UseStartup<Startup>()
+                .Build();
 
             using (var scope = host.Services.CreateScope())
             {
@@ -20,7 +45,14 @@ namespace LorikeetRESTApp
                 DatabaseSeed.Seed(context, passwordHasher);
             }
 
-            host.Run();
+            if (isService)
+            {
+                host.RunAsCustomService();
+            }
+            else
+            {
+                host.Run();
+            }
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
